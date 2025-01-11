@@ -3,25 +3,43 @@ import { AppearanceConfig } from "../types/Config";
 import { TaskData, Task } from "../types/Display";
 
 const performCustomSort = (originalTasks: Task[]): Task[] => {
-  const temp: Task[] = [];
-  originalTasks
-    .filter((task) => task.parent === undefined) // Filter tasks to only parent tasks
-    .sort((a, b) => (a.position > b.position ? 1 : -1)) // Sort parent tasks by position
-    .forEach((task) => {
-      // Map over parents to create reordered list of tasks
-      temp.push(task);
+  // const temp: Task[] = [];
+  // originalTasks
+  //   .filter((task) => task.parent === undefined) // Filter tasks to only parent tasks
+  //   .sort((a, b) => (a.position > b.position ? 1 : -1)) // Sort parent tasks by position
+  //   .forEach((task) => {
+  //     // Map over parents to create reordered list of tasks
+  //     temp.push(task);
 
-      // Loop through all tasks to find and sort subtasks for each parent
-      const subList: Task[] = [];
-      originalTasks.forEach((subtask) => {
-        if (subtask.parent === task.id) {
-          subList.push(subtask);
-        }
-      });
-      subList.sort((a, b) => (a.position > b.position ? 1 : -1));
-      temp.push(...subList);
-    });
-  return temp;
+  //     // Loop through all tasks to find and sort subtasks for each parent
+  //     const subList: Task[] = [];
+  //     originalTasks.forEach((subtask) => {
+  //       if (subtask.parent === task.id) {
+  //         subList.push(subtask);
+  //       }
+  //     });
+  //     subList.sort((a, b) => (a.position > b.position ? 1 : -1));
+  //     temp.push(...subList);
+  //   });
+
+  let grouped: any = originalTasks.filter(task => task.parent);
+  grouped = Object.groupBy(grouped, (item: any) => item.parent);
+
+  const temp2: Task[] = originalTasks
+    .filter((task) => task.parent === undefined);
+
+  for (const [key, value] of Object.entries(grouped)) {
+    const tasks = value as Task[];
+    tasks.sort((a, b) => (a.position > b.position ? 1 : -1));
+    const index = temp2.findIndex(item => item.id == key);
+      if(index > -1){
+        temp2[index].subTasks = tasks;
+      }
+  }
+
+  temp2.sort((a, b) => (a.position > b.position ? 1 : -1));
+
+  return temp2;
 };
 
 const getOrderedTasks = (originalTasks: Task[], config: AppearanceConfig): Task[] => {
@@ -82,19 +100,31 @@ const getItemView = (item: Task, config: AppearanceConfig): HTMLElement => {
   const itemWrapper = document.createElement("li");
   itemWrapper.className = "item";
 
+  // Title
   const titleWrapper = document.createElement("span");
 
   titleWrapper.innerText = item.title;
   titleWrapper.className = "title";
   titleWrapper.innerText = item.title;
 
+  itemWrapper.appendChild(titleWrapper);
+
+  // DATE
   const dateWrapper = getDateSpan(item, config);
 
   if (dateWrapper) {
     itemWrapper.appendChild(dateWrapper);
   }
 
-  itemWrapper.appendChild(titleWrapper);
+  // Notes
+  if(item.notes){
+    const descWrapper = document.createElement("p");
+    descWrapper.innerText = item.notes;
+    descWrapper.className = "notes";
+    
+    itemWrapper.appendChild(descWrapper);
+  }
+
   return itemWrapper;
 };
 
@@ -106,8 +136,21 @@ export const getTaskView = (taskData: TaskData, config: AppearanceConfig): HTMLE
 
   tasks.forEach((item) => {
     const itemWrapper = getItemView(item, config);
-
     wrapper.appendChild(itemWrapper);
+
+    if(item.subTasks){
+      const innerWrapper = document.createElement("ul");
+      innerWrapper.style.maxWidth = config.maxWidth ?? "auto";
+      
+      item.subTasks.forEach(subTask => {
+        const innerItemWrapper = getItemView(subTask, config);
+        innerWrapper.appendChild(innerItemWrapper);
+      })
+
+
+      itemWrapper.appendChild(innerWrapper);
+      
+    }
   });
 
   return wrapper;

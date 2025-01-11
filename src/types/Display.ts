@@ -11,4 +11,5 @@ export type Task = {
   notes?: string;
   status?: string;
   due?: string;
+  subTasks?: Task[];
 };

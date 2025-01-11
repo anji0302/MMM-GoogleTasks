@@ -8,7 +8,7 @@
   }
 
   .item {
-    text-align: right;
+    text-align: left;
     padding-bottom: 0.25em;
 
     .date {
@@ -33,9 +33,11 @@
     }
 
     .notes {
-      padding-left: 0.95em;
+      padding-left: 1.2em;
       font-size: 0.8em;
       padding-bottom: 0;
+      font-style: italic;
+      margin: 2px;
     }
 
     .child {
@@ -43,9 +45,9 @@
       padding-left: 1.5em;
     }
 
-    .title {
-      float: inline-end;
-    }
+    // .title {
+    //   float: inline-end;
+    // }
   }
 
   .fa {
@@ -56,9 +58,9 @@
   }
 
   ul {
-    padding-left: 0px;
+    padding-left: 12px;
     margin-top: 0px;
-    list-style-type: none;
+    // list-style-type: none;
 
     li {
       list-style-position: inside;
